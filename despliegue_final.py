@@ -8,17 +8,40 @@ Original file is located at
 """
 
 #Librerías
-import numpy as np
-import pandas as pd
-import pickle
-
 import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
+import os
+
+# NECESARIO para cargar el pipeline
+def preparar_datos(df):
+    df = df.copy()
+    
+    df.loc[df['RestingBP'] == 0, 'RestingBP'] = np.nan
+    df['RestingBP'] = df['RestingBP'].fillna(df['RestingBP'].median())
+    
+    if 'Cholesterol' in df.columns:
+        df = df.drop(columns=['Cholesterol'])
+    
+    df = pd.get_dummies(df, columns=['Sex', 'ExerciseAngina'], drop_first=True, dtype=int)
+    df = pd.get_dummies(df, columns=['ChestPainType', 'RestingECG', 'ST_Slope'], drop_first=False, dtype=int)
+    
+    if 'ST_Slope_Flat' in df.columns:
+        df = df.drop(columns=['ST_Slope_Flat'])
+    
+    df['HR_Reserve'] = df['MaxHR'] - df['Age']
+    df['AgeGroup'] = df['Age'].apply(lambda age: 0 if age < 45 else (1 if age < 60 else 2))
+    df['BP_Category'] = df['RestingBP'].apply(lambda bp: 0 if bp < 120 else (1 if bp < 140 else 2)) if 'RestingBP' in df.columns else 0
+    
+    df = df.drop(columns=['Age', 'RestingBP'], errors='ignore')
+    
+    if 'HeartDisease' in df.columns:
+        df = df.drop(columns=['HeartDisease'])
+    
+    return df
 
 # Cargar modelo
-import os
 filename = os.path.join(os.path.dirname(__file__), 'modelo_final.pkl')
 pipeline = pickle.load(open(filename, 'rb'))
 
