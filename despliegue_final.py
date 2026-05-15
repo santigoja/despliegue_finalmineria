@@ -96,8 +96,8 @@ if st.button('Predecir'):
                                   'RestingECG_ST', 'ST_Slope_Down', 'ST_Slope_Up',
                                   'HR_Reserve', 'AgeGroup', 'BP_Category'])
 
-    prediccion = pipeline_final.named_steps['modelo'].predict(datos)[0]
-    probabilidad = pipeline_final.named_steps['modelo'].predict_proba(datos)[0][1]
+    prediccion = pipeline.named_steps['modelo'].predict(datos)[0]
+    probabilidad = pipeline.named_steps['modelo'].predict_proba(datos)[0][1]
 
     if prediccion == 1:
         st.error('⚠️ El paciente TIENE riesgo de enfermedad cardíaca')
