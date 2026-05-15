@@ -69,14 +69,39 @@ datos = pd.DataFrame([[age, resting_bp, 1 if fasting_bs == 'Sí' else 0,
 
 # Predicción
 if st.button('Predecir'):
-    prediccion = pipeline.predict(datos)[0]
-    probabilidad = pipeline.predict_proba(datos)[0][1]
+    # Preparación manual
+    sex_m = 1 if sex == 'M' else 0
+    exercise_angina_y = 1 if exercise_angina == 'Y' else 0
+    chest_asy = 1 if chest_pain == 'ASY' else 0
+    chest_ata = 1 if chest_pain == 'ATA' else 0
+    chest_nap = 1 if chest_pain == 'NAP' else 0
+    chest_ta = 1 if chest_pain == 'TA' else 0
+    ecg_lvh = 1 if resting_ecg == 'LVH' else 0
+    ecg_normal = 1 if resting_ecg == 'Normal' else 0
+    ecg_st = 1 if resting_ecg == 'ST' else 0
+    slope_down = 1 if st_slope == 'Down' else 0
+    slope_up = 1 if st_slope == 'Up' else 0
+    hr_reserve = max_hr - age
+    age_group = 0 if age < 45 else (1 if age < 60 else 2)
+    bp_category = 0 if resting_bp < 120 else (1 if resting_bp < 140 else 2)
+    fasting = 1 if fasting_bs == 'Sí' else 0
+
+    datos = pd.DataFrame([[fasting, max_hr, oldpeak, sex_m, exercise_angina_y,
+                           chest_asy, chest_ata, chest_nap, chest_ta,
+                           ecg_lvh, ecg_normal, ecg_st, slope_down, slope_up,
+                           hr_reserve, age_group, bp_category]],
+                         columns=['FastingBS', 'MaxHR', 'Oldpeak', 'Sex_M', 'ExerciseAngina_Y',
+                                  'ChestPainType_ASY', 'ChestPainType_ATA', 'ChestPainType_NAP',
+                                  'ChestPainType_TA', 'RestingECG_LVH', 'RestingECG_Normal',
+                                  'RestingECG_ST', 'ST_Slope_Down', 'ST_Slope_Up',
+                                  'HR_Reserve', 'AgeGroup', 'BP_Category'])
+
+    prediccion = pipeline_final.named_steps['modelo'].predict(datos)[0]
+    probabilidad = pipeline_final.named_steps['modelo'].predict_proba(datos)[0][1]
 
     if prediccion == 1:
-        st.error(f' El paciente TIENE riesgo de enfermedad cardíaca')
+        st.error('⚠️ El paciente TIENE riesgo de enfermedad cardíaca')
     else:
-        st.success(f' El paciente NO tiene riesgo de enfermedad cardíaca')
-
+        st.success('✅ El paciente NO tiene riesgo de enfermedad cardíaca')
+    
     st.info(f'Probabilidad de enfermedad: {probabilidad*100:.1f}%')
-
-st.warning('El modelo tiene una precisión aproximada del 88%')
