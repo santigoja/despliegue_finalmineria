@@ -18,7 +18,8 @@ import pandas as pd
 import pickle
 
 # Cargar modelo
-filename = 'modelo_final.pkl'
+import os
+filename = os.path.join(os.path.dirname(__file__), 'modelo_final.pkl')
 pipeline = pickle.load(open(filename, 'rb'))
 
 st.title('Predicción de Enfermedad Cardíaca')
