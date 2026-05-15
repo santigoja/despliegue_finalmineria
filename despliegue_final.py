@@ -54,11 +54,11 @@ resting_bp = st.slider('Presión Arterial en Reposo (mm Hg)', min_value=80, max_
 max_hr = st.slider('Frecuencia Cardíaca Máxima', min_value=60, max_value=220, value=150, step=1)
 oldpeak = st.slider('Oldpeak', min_value=0.0, max_value=6.0, value=1.0, step=0.1)
 fasting_bs = st.selectbox('Azúcar en Sangre en Ayunas > 120 mg/dl', ['No', 'Sí'])
-sex = st.selectbox('Sexo', ['M', 'F'])
-chest_pain = st.selectbox('Tipo de Dolor en el Pecho', ['ATA', 'NAP', 'ASY', 'TA'])
-resting_ecg = st.selectbox('ECG en Reposo', ['Normal', 'ST', 'LVH'])
-exercise_angina = st.selectbox('Angina por Ejercicio', ['N', 'Y'])
-st_slope = st.selectbox('Pendiente ST', ['Up', 'Flat', 'Down'])
+sex = st.selectbox('Sexo', ['Masculino', 'Femenino'])
+chest_pain = st.selectbox('Tipo de Dolor en el Pecho', ['Angina Típica (TA)', 'Angina Atípica (ATA)', 'Dolor No Anginoso (NAP)', 'Asintomático (ASY)'])
+resting_ecg = st.selectbox('ECG en Reposo', ['Normal', 'Anormalidad de onda ST-T (ST)', 'Hipertrofia Ventricular Izquierda (LVH)'])
+exercise_angina = st.selectbox('Angina por Ejercicio', ['No', 'Sí'])
+st_slope = st.selectbox('Pendiente ST', ['Ascendente (Up)', 'Plana (Flat)', 'Descendente (Down)'])
 
 # DataFrame con datos crudos
 datos = pd.DataFrame([[age, resting_bp, 1 if fasting_bs == 'Sí' else 0,
@@ -70,17 +70,17 @@ datos = pd.DataFrame([[age, resting_bp, 1 if fasting_bs == 'Sí' else 0,
 # Predicción
 if st.button('Predecir'):
     # Preparación manual
-    sex_m = 1 if sex == 'M' else 0
-    exercise_angina_y = 1 if exercise_angina == 'Y' else 0
-    chest_asy = 1 if chest_pain == 'ASY' else 0
-    chest_ata = 1 if chest_pain == 'ATA' else 0
-    chest_nap = 1 if chest_pain == 'NAP' else 0
-    chest_ta = 1 if chest_pain == 'TA' else 0
-    ecg_lvh = 1 if resting_ecg == 'LVH' else 0
+    sex_m = 1 if sex == 'Masculino' else 0
+    exercise_angina_y = 1 if exercise_angina == 'Sí' else 0
+    chest_asy = 1 if chest_pain == 'Asintomático (ASY)' else 0
+    chest_ata = 1 if chest_pain == 'Angina Atípica (ATA)' else 0
+    chest_nap = 1 if chest_pain == 'Dolor No Anginoso (NAP)' else 0
+    chest_ta = 1 if chest_pain == 'Angina Típica (TA)' else 0
+    ecg_lvh = 1 if resting_ecg == 'Hipertrofia Ventricular Izquierda (LVH)' else 0
     ecg_normal = 1 if resting_ecg == 'Normal' else 0
-    ecg_st = 1 if resting_ecg == 'ST' else 0
-    slope_down = 1 if st_slope == 'Down' else 0
-    slope_up = 1 if st_slope == 'Up' else 0
+    ecg_st = 1 if resting_ecg == 'Anormalidad de onda ST-T (ST)' else 0
+    slope_down = 1 if st_slope == 'Descendente (Down)' else 0
+    slope_up = 1 if st_slope == 'Ascendente (Up)' else 0
     hr_reserve = max_hr - age
     age_group = 0 if age < 45 else (1 if age < 60 else 2)
     bp_category = 0 if resting_bp < 120 else (1 if resting_bp < 140 else 2)
@@ -100,8 +100,8 @@ if st.button('Predecir'):
     probabilidad = pipeline.named_steps['modelo'].predict_proba(datos)[0][1]
 
     if prediccion == 1:
-        st.error('⚠️ El paciente TIENE riesgo de enfermedad cardíaca')
+        st.error(' El paciente TIENE riesgo de enfermedad cardíaca')
     else:
-        st.success('✅ El paciente NO tiene riesgo de enfermedad cardíaca')
+        st.success(' El paciente NO tiene riesgo de enfermedad cardíaca')
     
     st.info(f'Probabilidad de enfermedad: {probabilidad*100:.1f}%')
